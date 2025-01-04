@@ -1,16 +1,16 @@
 <script setup>
+import LeadsVue from "./components/Leads.vue";
 import SideBarVue from "./components/SideBar.vue";
 </script>
 
 <template>
-  <v-responsive class="border rounded" max-height="300">
+  <v-responsive>
     <v-app>
       <v-app-bar title="Mini CRM"></v-app-bar>
-
       <SideBarVue />
       <v-main>
         <v-container>
-          <h1>Main Content</h1>
+          <LeadsVue />
         </v-container>
       </v-main>
     </v-app>
