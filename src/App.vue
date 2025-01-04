@@ -1,16 +1,18 @@
-<script setup>
-import LeadsVue from "./components/Leads.vue";
+<script setup lang="ts">
 import SideBarVue from "./components/SideBar.vue";
+import LeadsListPage from "./pages/LeadsListPage.vue";
 </script>
 
 <template>
   <v-responsive>
     <v-app>
-      <v-app-bar title="Mini CRM"></v-app-bar>
+      <v-app-bar title="Mini CRM" />
       <SideBarVue />
       <v-main>
         <v-container>
-          <LeadsVue />
+          <v-card>
+            <LeadsListPage />
+          </v-card>
         </v-container>
       </v-main>
     </v-app>
