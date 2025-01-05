@@ -2,7 +2,7 @@
   <v-data-table
     :headers="headers"
     :items="leads"
-    :sort-by="[{ key: 'calories', order: 'asc' }]"
+    :sort-by="[{ key: 'id', order: 'desc' }]"
   >
     <template v-slot:top>
       <v-toolbar flat>
@@ -12,7 +12,7 @@
         <v-dialog v-model="dialog" max-width="500px">
           <template v-slot:activator="{ props }">
             <v-btn class="mb-2" color="primary" dark v-bind="props">
-              New Item
+              New Lead
             </v-btn>
           </template>
           <v-card>
@@ -21,58 +21,65 @@
             </v-card-title>
 
             <v-card-text>
-              <v-container>
-                <v-row>
-                  <v-col cols="12" md="4" sm="6">
-                    <v-text-field
-                      v-model="editedItem.first_name"
-                      label="First Name"
-                      :rules="[(value) => !!value || 'First Name is required']"
-                    />
-                  </v-col>
-                  <v-col cols="12" md="4" sm="6">
-                    <v-text-field
-                      v-model="editedItem.middle_name"
-                      label="Middle Name"
-                      :rules="[(value) => !!value || 'Middle Name is required']"
-                    />
-                  </v-col>
-                  <v-col cols="12" md="4" sm="6">
-                    <v-text-field
-                      v-model="editedItem.last_name"
-                      label="Last Name"
-                      :rules="[(value) => !!value || 'Last Name is required']"
-                    />
-                  </v-col>
-                  <v-col cols="12" md="4" sm="6">
-                    <v-text-field
-                      v-model="editedItem.phone_number"
-                      label="Phone"
-                      :rules="[
-                        (value) => !!value || 'Phone Number is required',
-                      ]"
-                    />
-                  </v-col>
-                  <v-col cols="12" md="4" sm="6">
-                    <v-text-field
-                      v-model="editedItem.location"
-                      label="Location"
-                      :rules="[(value) => !!value || 'Location is required']"
-                    />
-                  </v-col>
-                  <v-col cols="12" md="4" sm="6">
-                    <v-select
-                      v-model="editedItem.gender"
-                      :items="genderOptions"
-                      item-title="label"
-                      item-value="value"
-                      label="Select Gender"
-                      single-line
-                      :rules="[(value) => !!value || 'Gender is required']"
-                    />
-                  </v-col>
-                </v-row>
-              </v-container>
+              <!-- Wrap the form fields inside v-form -->
+              <v-form ref="form" v-model="valid">
+                <v-container>
+                  <v-row>
+                    <v-col cols="12" md="4" sm="6">
+                      <v-text-field
+                        v-model="editedLead.first_name"
+                        :label="getLabel('First Name')"
+                        :rules="[
+                          (value) => !!value || 'First Name is required',
+                        ]"
+                      />
+                    </v-col>
+                    <v-col cols="12" md="4" sm="6">
+                      <v-text-field
+                        v-model="editedLead.middle_name"
+                        :label="getLabel('Middle Name')"
+                        :rules="[
+                          (value) => !!value || 'Middle Name is required',
+                        ]"
+                      />
+                    </v-col>
+                    <v-col cols="12" md="4" sm="6">
+                      <v-text-field
+                        v-model="editedLead.last_name"
+                        :label="getLabel('Last Name')"
+                        :rules="[(value) => !!value || 'Last Name is required']"
+                      />
+                    </v-col>
+                    <v-col cols="12" md="4" sm="6">
+                      <v-text-field
+                        v-model="editedLead.phone_number"
+                        :label="getLabel('Phone')"
+                        :rules="[
+                          (value) => !!value || 'Phone Number is required',
+                        ]"
+                      />
+                    </v-col>
+                    <v-col cols="12" md="4" sm="6">
+                      <v-text-field
+                        v-model="editedLead.location"
+                        :label="getLabel('Location')"
+                        :rules="[(value) => !!value || 'Location is required']"
+                      />
+                    </v-col>
+                    <v-col cols="12" md="4" sm="6">
+                      <v-select
+                        v-model="editedLead.gender"
+                        :items="genderOptions"
+                        item-title="label"
+                        item-value="value"
+                        :label="getLabel('Select Gender')"
+                        single-line
+                        :rules="[(value) => !!value || 'Gender is required']"
+                      />
+                    </v-col>
+                  </v-row>
+                </v-container>
+              </v-form>
             </v-card-text>
 
             <v-card-actions>
@@ -80,7 +87,12 @@
               <v-btn color="blue-darken-1" variant="text" @click="close">
                 Cancel
               </v-btn>
-              <v-btn color="blue-darken-1" variant="text" @click="save">
+              <v-btn
+                color="blue-darken-1"
+                variant="text"
+                @click="save"
+                :disabled="!valid"
+              >
                 Save
               </v-btn>
             </v-card-actions>
@@ -89,7 +101,7 @@
         <v-dialog v-model="dialogDelete" max-width="500px">
           <v-card>
             <v-card-title class="text-h5"
-              >Are you sure you want to delete this item?</v-card-title
+              >Are you sure you want to delete this lead?</v-card-title
             >
             <v-card-actions>
               <v-spacer></v-spacer>
@@ -99,7 +111,7 @@
               <v-btn
                 color="blue-darken-1"
                 variant="text"
-                @click="deleteItemConfirm"
+                @click="deleteLeadConfirm"
                 >OK</v-btn
               >
               <v-spacer></v-spacer>
@@ -109,16 +121,31 @@
       </v-toolbar>
     </template>
     <template v-slot:item.actions="{ item }">
-      <v-icon class="me-2" size="small" @click="editItem(item)">
+      <v-icon class="me-2" size="small" @click="editLead(item)">
         mdi-pencil
       </v-icon>
-      <v-icon size="small" @click="deleteItem(item)"> mdi-delete </v-icon>
+      <v-icon size="small" @click="deleteLead(item)"> mdi-delete </v-icon>
+    </template>
+    <template v-slot:item.gender="{ item }">
+      <span>{{ mapGender(item.gender) }}</span>
+      <!-- This is where gender will be displayed -->
     </template>
     <template v-slot:no-data>
       <v-btn color="primary" @click="initialize"> Reset </v-btn>
     </template>
   </v-data-table>
+
+  <v-snackbar
+    v-model="snackbar.visible"
+    :timeout="snackbar.timeout"
+    color="success"
+    top
+    right
+  >
+    {{ snackbar.message }}
+  </v-snackbar>
 </template>
+
 <script>
 import axios from "axios";
 
@@ -126,10 +153,16 @@ export default {
   data: () => ({
     dialog: false,
     dialogDelete: false,
+    valid: false,
+    snackbar: {
+      visible: false,
+      message: "",
+      timeout: 3000,
+    },
     headers: [
       { title: "ID", align: "start", sortable: false, key: "id" },
-      { title: "Frist Name", key: "first_name" },
-      { title: "Middel Name", key: "middle_name" },
+      { title: "First Name", key: "first_name" },
+      { title: "Middle Name", key: "middle_name" },
       { title: "Last Name", key: "last_name" },
       { title: "Phone Number", key: "phone_number" },
       { title: "Location", key: "location" },
@@ -137,14 +170,13 @@ export default {
       { title: "Created At", key: "created_at" },
       { title: "Actions", key: "actions", sortable: false },
     ],
-    select: null,
     genderOptions: [
       { label: "Male", value: "M" },
       { label: "Female", value: "F" },
     ],
     leads: [],
     editedIndex: -1,
-    editedItem: {
+    editedLead: {
       first_name: "",
       middle_name: "",
       last_name: "",
@@ -152,36 +184,33 @@ export default {
       location: "",
       gender: "M",
     },
-    defaultItem: {
+    defaultLead: {
       first_name: "",
       middle_name: "",
       last_name: "",
       phone_number: "",
       location: "",
-      gender: "",
+      gender: "M",
     },
   }),
 
   computed: {
     formTitle() {
-      return this.editedIndex === -1 ? "New Item" : "Edit Item";
+      return this.editedIndex === -1 ? "New Lead" : "Edit Lead";
     },
   },
-
-  watch: {
-    dialog(val) {
-      val || this.close();
-    },
-    dialogDelete(val) {
-      val || this.closeDelete();
-    },
-  },
-
-  created() {
+  mounted() {
     this.initialize();
   },
 
   methods: {
+    getLabel(field) {
+      return `${field} *`;
+    },
+    mapGender(gender) {
+      return gender === "M" ? "Male" : gender === "F" ? "Female" : "";
+    },
+
     async initialize() {
       try {
         const response = await axios.get(
@@ -193,25 +222,26 @@ export default {
       }
     },
 
-    editItem(item) {
+    editLead(item) {
       this.editedIndex = this.leads.indexOf(item);
-      this.editedItem = Object.assign({}, item);
+      this.editedLead = Object.assign({}, item);
       this.dialog = true;
     },
 
-    deleteItem(item) {
+    deleteLead(item) {
       this.editedIndex = this.leads.indexOf(item);
-      this.editedItem = Object.assign({}, item);
+      this.editedLead = Object.assign({}, item);
       this.dialogDelete = true;
     },
 
-    async deleteItemConfirm() {
+    async deleteLeadConfirm() {
       try {
         await axios.delete(
-          `${import.meta.env.VITE_API_URL}/leads/${this.editedItem.id}/`
+          `${import.meta.env.VITE_API_URL}/leads/${this.editedLead.id}/delete/`
         );
         this.leads.splice(this.editedIndex, 1);
         this.closeDelete();
+        this.showToast("Lead deleted successfully!");
       } catch (error) {
         console.error("Error deleting item:", error);
       }
@@ -220,7 +250,7 @@ export default {
     close() {
       this.dialog = false;
       this.$nextTick(() => {
-        this.editedItem = Object.assign({}, this.defaultItem);
+        this.editedLead = Object.assign({}, this.defaultLead);
         this.editedIndex = -1;
       });
     },
@@ -228,36 +258,49 @@ export default {
     closeDelete() {
       this.dialogDelete = false;
       this.$nextTick(() => {
-        this.editedItem = Object.assign({}, this.defaultItem);
+        this.editedLead = Object.assign({}, this.defaultLead);
         this.editedIndex = -1;
       });
     },
 
     async save() {
-      if (this.editedIndex > -1) {
-        // Update existing item
-        try {
-          const response = await axios.put(
-            `${import.meta.env.VITE_API_URL}/leads/${this.editedItem.id}/`,
-            this.editedItem
-          );
-          Object.assign(this.leads[this.editedIndex], response.data);
-        } catch (error) {
-          console.error("Error updating item:", error);
+      // Trigger the form validation
+      const form = this.$refs.form;
+      if (form.validate()) {
+        if (this.editedIndex > -1) {
+          try {
+            const response = await axios.put(
+              `${import.meta.env.VITE_API_URL}/leads/${
+                this.editedLead.id
+              }/update/`,
+              this.editedLead
+            );
+            Object.assign(this.leads[this.editedIndex], response.data);
+            this.showToast("Lead updated successfully!");
+          } catch (error) {
+            console.error("Error updating item:", error);
+          }
+        } else {
+          try {
+            const response = await axios.post(
+              `${import.meta.env.VITE_API_URL}/leads/create/`,
+              this.editedLead
+            );
+            this.leads.push(response.data);
+            this.showToast("New lead created successfully!");
+          } catch (error) {
+            console.error("Error creating item:", error);
+          }
         }
+        this.close();
       } else {
-        // Create new item
-        try {
-          const response = await axios.post(
-            `${import.meta.env.VITE_API_URL}/leads/`,
-            this.editedItem
-          );
-          this.leads.push(response.data);
-        } catch (error) {
-          console.error("Error creating item:", error);
-        }
+        console.log("Validation failed");
       }
-      this.close();
+    },
+    showToast(message, color = "success") {
+      this.snackbar.message = message;
+      this.snackbar.color = color;
+      this.snackbar.visible = true;
     },
   },
 };
