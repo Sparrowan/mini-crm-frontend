@@ -1,11 +1,9 @@
 <script setup lang="ts">
-
-import Leads from '../components/Leads.vue';
-
+import LeadDetails from "../components/LeadDetails.vue";
 </script>
 
 <template>
   <main>
-    <!-- <Leads /> -->
+    <LeadDetails />
   </main>
 </template>
