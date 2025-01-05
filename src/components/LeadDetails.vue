@@ -84,15 +84,17 @@ export default {
 
     <v-card-text>
       <v-tabs-window v-model="tab">
-        <v-tabs-window-item value="contacts"> 
-            <Contacts />
-             </v-tabs-window-item>
+        <v-tabs-window-item value="contacts">
+          <Contacts />
+        </v-tabs-window-item>
 
-        <v-tabs-window-item value="notes"> 
-            <Notes />
-             </v-tabs-window-item>
+        <v-tabs-window-item value="notes">
+          <Notes />
+        </v-tabs-window-item>
 
-        <v-tabs-window-item value="reminders"> Three </v-tabs-window-item>
+        <v-tabs-window-item value="reminders">
+          <Reminders />
+        </v-tabs-window-item>
       </v-tabs-window>
     </v-card-text>
   </v-card>

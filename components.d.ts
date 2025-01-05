@@ -12,6 +12,7 @@ declare module 'vue' {
     LeadDetails: typeof import('./src/components/LeadDetails.vue')['default']
     Leads: typeof import('./src/components/Leads.vue')['default']
     Notes: typeof import('./src/components/Notes.vue')['default']
+    Reminders: typeof import('./src/components/Reminders.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     SideBar: typeof import('./src/components/SideBar.vue')['default']
