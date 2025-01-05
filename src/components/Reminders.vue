@@ -90,7 +90,10 @@
       </v-icon>
     </template>
     <template v-slot:no-data>
-      <v-btn color="primary" @click="initialize"> Reset </v-btn>
+      <v-btn color="primary" @click="initialize"> Refresh Data </v-btn>
+    </template>
+    <template v-slot:item.created_at="{ item }">
+      {{ formatDate(item.created_at) }}
     </template>
   </v-data-table>
 
@@ -108,11 +111,12 @@
 <script>
 import axios from "axios";
 import { useRoute } from "vue-router";
+import { formatDate } from "../utils";
 
 export default {
   setup() {
     const route = useRoute();
-    return { route };
+    return { route, formatDate };
   },
   data: () => ({
     dialog: false,

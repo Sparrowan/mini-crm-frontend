@@ -2,6 +2,7 @@
 import { ref, onMounted } from "vue";
 import { useRoute } from "vue-router";
 import axios from "axios";
+import { formatDate } from "../utils";
 
 // Composition API approach
 export default {
@@ -45,6 +46,7 @@ export default {
       loading,
       error,
       tab,
+      formatDate
     };
   },
 };
@@ -60,7 +62,7 @@ export default {
       <div>
         <strong>Gender:</strong> {{ lead.gender === "M" ? "Male" : "Female" }}
       </div>
-      <div><strong>Created At:</strong> {{ lead.created_at }}</div>
+      <div><strong>Created At:</strong> {{ formatDate(lead.created_at) }}</div>
     </v-card-text>
   </v-card>
 
