@@ -125,7 +125,7 @@
   <v-snackbar
     v-model="snackbar.visible"
     :timeout="snackbar.timeout"
-    color="success"
+    :color="snackbar.color"
     top
     right
   >
@@ -151,6 +151,7 @@ export default {
       visible: false,
       message: "",
       timeout: 3000,
+      color: "success",
     },
     headers: [
       { title: "ID", align: "start", sortable: false, key: "id" },
@@ -203,8 +204,14 @@ export default {
     },
     async initialize() {
       try {
+        const leadId = this.route.params.id;
         const response = await axios.get(
-          `${import.meta.env.VITE_API_URL}/contacts/list`
+          `${import.meta.env.VITE_API_URL}/contacts/list`,
+          {
+            params: {
+              lead_id: leadId, // Include lead_id as a query parameter
+            },
+          }
         );
         this.contacts = response.data;
       } catch (error) {
@@ -278,6 +285,10 @@ export default {
             this.showToast("Contact updated successfully!");
           } catch (error) {
             console.error("Error updating item:", error);
+            this.showToast(
+              "Error! Contact with that email already exists",
+              "red"
+            );
           }
         } else {
           try {
@@ -289,6 +300,10 @@ export default {
             this.showToast("New contact created successfully!");
           } catch (error) {
             console.error("Error creating item:", error);
+            this.showToast(
+              "Error! Contact with that email already exists",
+              "red"
+            );
           }
         }
         this.close();
