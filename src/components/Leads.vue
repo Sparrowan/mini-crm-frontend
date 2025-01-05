@@ -25,33 +25,51 @@
                 <v-row>
                   <v-col cols="12" md="4" sm="6">
                     <v-text-field
-                      v-model="editedItem.name"
-                      label="Dessert name"
-                    ></v-text-field>
+                      v-model="editedItem.first_name"
+                      label="First Name"
+                      :rules="[(value) => !!value || 'First Name is required']"
+                    />
                   </v-col>
                   <v-col cols="12" md="4" sm="6">
                     <v-text-field
-                      v-model="editedItem.calories"
-                      label="Calories"
-                    ></v-text-field>
+                      v-model="editedItem.middle_name"
+                      label="Middle Name"
+                      :rules="[(value) => !!value || 'Middle Name is required']"
+                    />
                   </v-col>
                   <v-col cols="12" md="4" sm="6">
                     <v-text-field
-                      v-model="editedItem.fat"
-                      label="Fat (g)"
-                    ></v-text-field>
+                      v-model="editedItem.last_name"
+                      label="Last Name"
+                      :rules="[(value) => !!value || 'Last Name is required']"
+                    />
                   </v-col>
                   <v-col cols="12" md="4" sm="6">
                     <v-text-field
-                      v-model="editedItem.carbs"
-                      label="Carbs (g)"
-                    ></v-text-field>
+                      v-model="editedItem.phone_number"
+                      label="Phone"
+                      :rules="[
+                        (value) => !!value || 'Phone Number is required',
+                      ]"
+                    />
                   </v-col>
                   <v-col cols="12" md="4" sm="6">
                     <v-text-field
-                      v-model="editedItem.protein"
-                      label="Protein (g)"
-                    ></v-text-field>
+                      v-model="editedItem.location"
+                      label="Location"
+                      :rules="[(value) => !!value || 'Location is required']"
+                    />
+                  </v-col>
+                  <v-col cols="12" md="4" sm="6">
+                    <v-select
+                      v-model="editedItem.gender"
+                      :items="genderOptions"
+                      item-title="label"
+                      item-value="value"
+                      label="Select Gender"
+                      single-line
+                      :rules="[(value) => !!value || 'Gender is required']"
+                    />
                   </v-col>
                 </v-row>
               </v-container>
@@ -119,6 +137,11 @@ export default {
       { title: "Created At", key: "created_at" },
       { title: "Actions", key: "actions", sortable: false },
     ],
+    select: null,
+    genderOptions: [
+      { label: "Male", value: "M" },
+      { label: "Female", value: "F" },
+    ],
     leads: [],
     editedIndex: -1,
     editedItem: {
@@ -135,7 +158,7 @@ export default {
       last_name: "",
       phone_number: "",
       location: "",
-      gender: "M",
+      gender: "",
     },
   }),
 
