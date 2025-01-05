@@ -95,6 +95,16 @@
     <template v-slot:item.created_at="{ item }">
       {{ formatDate(item.created_at) }}
     </template>
+    <template v-slot:item.status="{ item }">
+      <span
+        :class="{
+          'bg-warning text-white py-1 px-2 rounded': item.status === 'pending',
+          'bg-success text-white py-1 px-2 rounded':
+            item.status === 'processed',
+        }"
+        >{{ item.status === "pending" ? "Pending" : "Processed" }}</span
+      >
+    </template>
   </v-data-table>
 
   <v-snackbar
