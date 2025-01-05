@@ -1,18 +1,18 @@
 <template>
   <v-data-table
     :headers="headers"
-    :items="leads"
+    :items="contacts"
     :sort-by="[{ key: 'id', order: 'desc' }]"
   >
     <template v-slot:top>
       <v-toolbar flat>
-        <v-toolbar-title>Leads</v-toolbar-title>
+        <v-toolbar-title>Contacts</v-toolbar-title>
         <v-divider class="mx-4" inset vertical></v-divider>
         <v-spacer></v-spacer>
-        <v-dialog v-model="dialog" max-width="500px">
+        <v-dialog v-model="dialog">
           <template v-slot:activator="{ props }">
             <v-btn class="mb-2" color="primary" dark v-bind="props">
-              New Lead
+              New Contact
             </v-btn>
           </template>
           <v-card>
@@ -27,7 +27,7 @@
                   <v-row>
                     <v-col cols="12" md="4" sm="6">
                       <v-text-field
-                        v-model="editedLead.first_name"
+                        v-model="editedContact.first_name"
                         :label="getLabel('First Name')"
                         :rules="[
                           (value) => !!value || 'First Name is required',
@@ -36,7 +36,7 @@
                     </v-col>
                     <v-col cols="12" md="4" sm="6">
                       <v-text-field
-                        v-model="editedLead.middle_name"
+                        v-model="editedContact.middle_name"
                         :label="getLabel('Middle Name')"
                         :rules="[
                           (value) => !!value || 'Middle Name is required',
@@ -45,14 +45,14 @@
                     </v-col>
                     <v-col cols="12" md="4" sm="6">
                       <v-text-field
-                        v-model="editedLead.last_name"
+                        v-model="editedContact.last_name"
                         :label="getLabel('Last Name')"
                         :rules="[(value) => !!value || 'Last Name is required']"
                       />
                     </v-col>
                     <v-col cols="12" md="4" sm="6">
                       <v-text-field
-                        v-model="editedLead.phone_number"
+                        v-model="editedContact.phone_number"
                         :label="getLabel('Phone')"
                         :rules="[
                           (value) => !!value || 'Phone Number is required',
@@ -61,20 +61,9 @@
                     </v-col>
                     <v-col cols="12" md="4" sm="6">
                       <v-text-field
-                        v-model="editedLead.location"
-                        :label="getLabel('Location')"
-                        :rules="[(value) => !!value || 'Location is required']"
-                      />
-                    </v-col>
-                    <v-col cols="12" md="4" sm="6">
-                      <v-select
-                        v-model="editedLead.gender"
-                        :items="genderOptions"
-                        item-title="label"
-                        item-value="value"
-                        :label="getLabel('Select Gender')"
-                        single-line
-                        :rules="[(value) => !!value || 'Gender is required']"
+                        v-model="editedContact.email"
+                        :label="getLabel('Email')"
+                        :rules="[(value) => !!value || 'Email is required']"
                       />
                     </v-col>
                   </v-row>
@@ -101,7 +90,7 @@
         <v-dialog v-model="dialogDelete" max-width="500px">
           <v-card>
             <v-card-title class="text-h5"
-              >Are you sure you want to delete this lead?</v-card-title
+              >Are you sure you want to delete this contact?</v-card-title
             >
             <v-card-actions>
               <v-spacer></v-spacer>
@@ -111,7 +100,7 @@
               <v-btn
                 color="blue-darken-1"
                 variant="text"
-                @click="deleteLeadConfirm"
+                @click="deleteContactConfirm"
                 >OK</v-btn
               >
               <v-spacer></v-spacer>
@@ -121,19 +110,12 @@
       </v-toolbar>
     </template>
     <template v-slot:item.actions="{ item }">
-      <RouterLink :to="`/lead/${item.id}`">
-        <v-icon class="me-2" size="small" color="green"> mdi-eye </v-icon>
-      </RouterLink>
-      <v-icon class="me-2" size="small" @click="editLead(item)">
+      <v-icon class="me-2" size="small" @click="editContact(item)">
         mdi-pencil
       </v-icon>
-      <v-icon size="small" @click="deleteLead(item)" color="red">
+      <v-icon size="small" @click="deleteContact(item)" color="red">
         mdi-delete
       </v-icon>
-    </template>
-    <template v-slot:item.gender="{ item }">
-      <span>{{ mapGender(item.gender) }}</span>
-      <!-- This is where gender will be displayed -->
     </template>
     <template v-slot:no-data>
       <v-btn color="primary" @click="initialize"> Reset </v-btn>
@@ -153,8 +135,14 @@
 
 <script>
 import axios from "axios";
+import { useRoute } from "vue-router";
+const route = useRoute();
 
 export default {
+  setup() {
+    const route = useRoute();
+    return { route };
+  },
   data: () => ({
     dialog: false,
     dialogDelete: false,
@@ -170,38 +158,39 @@ export default {
       { title: "Middle Name", key: "middle_name" },
       { title: "Last Name", key: "last_name" },
       { title: "Phone Number", key: "phone_number" },
-      { title: "Location", key: "location" },
-      { title: "Gender", key: "gender" },
+      { title: "Email", key: "email" },
       { title: "Created At", key: "created_at" },
       { title: "Actions", key: "actions", sortable: false },
     ],
-    genderOptions: [
-      { label: "Male", value: "M" },
-      { label: "Female", value: "F" },
-    ],
-    leads: [],
+    contacts: [],
     editedIndex: -1,
-    editedLead: {
+    editedContact: {
       first_name: "",
       middle_name: "",
       last_name: "",
       phone_number: "",
-      location: "",
-      gender: "M",
+      email: "",
     },
-    defaultLead: {
+    defaultContact: {
       first_name: "",
       middle_name: "",
       last_name: "",
       phone_number: "",
-      location: "",
-      gender: "M",
+      email: "",
     },
   }),
 
   computed: {
     formTitle() {
-      return this.editedIndex === -1 ? "New Lead" : "Edit Lead";
+      return this.editedIndex === -1 ? "New Contact" : "Edit Contact";
+    },
+  },
+  watch: {
+    "route.params.id": {
+      handler(newId) {
+        this.editedContact.lead_id = newId;
+      },
+      immediate: true,
     },
   },
   mounted() {
@@ -212,47 +201,45 @@ export default {
     getLabel(field) {
       return `${field} *`;
     },
-    mapGender(gender) {
-      return gender === "M" ? "Male" : gender === "F" ? "Female" : "";
-    },
-
     async initialize() {
       try {
         const response = await axios.get(
-          `${import.meta.env.VITE_API_URL}/leads/list`
+          `${import.meta.env.VITE_API_URL}/contacts/list`
         );
-        this.leads = response.data;
+        this.contacts = response.data;
       } catch (error) {
         console.error("Error fetching data:", error);
       }
     },
 
-    editLead(item) {
-      this.editedIndex = this.leads.indexOf(item);
-      this.editedLead = Object.assign({}, item);
+    editContact(item) {
+      this.editedIndex = this.contacts.indexOf(item);
+      this.editedContact = Object.assign({}, item);
       this.dialog = true;
     },
 
     openDetails(item) {
-      this.editedIndex = this.leads.indexOf(item);
-      this.editedLead = Object.assign({}, item);
+      this.editedIndex = this.contacts.indexOf(item);
+      this.editedContact = Object.assign({}, item);
       this.dialog = true;
     },
 
-    deleteLead(item) {
-      this.editedIndex = this.leads.indexOf(item);
-      this.editedLead = Object.assign({}, item);
+    deleteContact(item) {
+      this.editedIndex = this.contacts.indexOf(item);
+      this.editedContact = Object.assign({}, item);
       this.dialogDelete = true;
     },
 
-    async deleteLeadConfirm() {
+    async deleteContactConfirm() {
       try {
         await axios.delete(
-          `${import.meta.env.VITE_API_URL}/leads/${this.editedLead.id}/delete/`
+          `${import.meta.env.VITE_API_URL}/contacts/${
+            this.editedContact.id
+          }/delete/`
         );
-        this.leads.splice(this.editedIndex, 1);
+        this.contacts.splice(this.editedIndex, 1);
         this.closeDelete();
-        this.showToast("Lead deleted successfully!");
+        this.showToast("Contact deleted successfully!");
       } catch (error) {
         console.error("Error deleting item:", error);
       }
@@ -261,7 +248,7 @@ export default {
     close() {
       this.dialog = false;
       this.$nextTick(() => {
-        this.editedLead = Object.assign({}, this.defaultLead);
+        this.editedContact = Object.assign({}, this.defaultContact);
         this.editedIndex = -1;
       });
     },
@@ -269,7 +256,7 @@ export default {
     closeDelete() {
       this.dialogDelete = false;
       this.$nextTick(() => {
-        this.editedLead = Object.assign({}, this.defaultLead);
+        this.editedContact = Object.assign({}, this.defaultContact);
         this.editedIndex = -1;
       });
     },
@@ -277,28 +264,29 @@ export default {
     async save() {
       // Trigger the form validation
       const form = this.$refs.form;
+      this.editedContact.lead_id = this.route.params.id;
       if (form.validate()) {
         if (this.editedIndex > -1) {
           try {
             const response = await axios.put(
-              `${import.meta.env.VITE_API_URL}/leads/${
-                this.editedLead.id
+              `${import.meta.env.VITE_API_URL}/contacts/${
+                this.editedContact.id
               }/update/`,
-              this.editedLead
+              this.editedContact
             );
-            Object.assign(this.leads[this.editedIndex], response.data);
-            this.showToast("Lead updated successfully!");
+            Object.assign(this.contacts[this.editedIndex], response.data);
+            this.showToast("Contact updated successfully!");
           } catch (error) {
             console.error("Error updating item:", error);
           }
         } else {
           try {
             const response = await axios.post(
-              `${import.meta.env.VITE_API_URL}/leads/create/`,
-              this.editedLead
+              `${import.meta.env.VITE_API_URL}/contacts/create/`,
+              this.editedContact
             );
-            this.leads.push(response.data);
-            this.showToast("New lead created successfully!");
+            this.contacts.push(response.data);
+            this.showToast("New contact created successfully!");
           } catch (error) {
             console.error("Error creating item:", error);
           }
