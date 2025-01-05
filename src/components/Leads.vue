@@ -1,7 +1,7 @@
 <template>
   <v-data-table
     :headers="headers"
-    :items="desserts"
+    :items="leads"
     :sort-by="[{ key: 'calories', order: 'asc' }]"
   >
     <template v-slot:top>
@@ -102,38 +102,40 @@
   </v-data-table>
 </template>
 <script>
+import axios from "axios";
+
 export default {
   data: () => ({
     dialog: false,
     dialogDelete: false,
     headers: [
-      {
-        title: "Dessert (100g serving)",
-        align: "start",
-        sortable: false,
-        key: "name",
-      },
-      { title: "Calories", key: "calories" },
-      { title: "Fat (g)", key: "fat" },
-      { title: "Carbs (g)", key: "carbs" },
-      { title: "Protein (g)", key: "protein" },
+      { title: "ID", align: "start", sortable: false, key: "id" },
+      { title: "Frist Name", key: "first_name" },
+      { title: "Middel Name", key: "middle_name" },
+      { title: "Last Name", key: "last_name" },
+      { title: "Phone Number", key: "phone_number" },
+      { title: "Location", key: "location" },
+      { title: "Gender", key: "gender" },
+      { title: "Created At", key: "created_at" },
       { title: "Actions", key: "actions", sortable: false },
     ],
-    desserts: [],
+    leads: [],
     editedIndex: -1,
     editedItem: {
-      name: "",
-      calories: 0,
-      fat: 0,
-      carbs: 0,
-      protein: 0,
+      first_name: "",
+      middle_name: "",
+      last_name: "",
+      phone_number: "",
+      location: "",
+      gender: "M",
     },
     defaultItem: {
-      name: "",
-      calories: 0,
-      fat: 0,
-      carbs: 0,
-      protein: 0,
+      first_name: "",
+      middle_name: "",
+      last_name: "",
+      phone_number: "",
+      location: "",
+      gender: "M",
     },
   }),
 
@@ -157,96 +159,39 @@ export default {
   },
 
   methods: {
-    initialize() {
-      this.desserts = [
-        {
-          name: "Frozen Yogurt",
-          calories: 159,
-          fat: 6.0,
-          carbs: 24,
-          protein: 4.0,
-        },
-        {
-          name: "Ice cream sandwich",
-          calories: 237,
-          fat: 9.0,
-          carbs: 37,
-          protein: 4.3,
-        },
-        {
-          name: "Eclair",
-          calories: 262,
-          fat: 16.0,
-          carbs: 23,
-          protein: 6.0,
-        },
-        {
-          name: "Cupcake",
-          calories: 305,
-          fat: 3.7,
-          carbs: 67,
-          protein: 4.3,
-        },
-        {
-          name: "Gingerbread",
-          calories: 356,
-          fat: 16.0,
-          carbs: 49,
-          protein: 3.9,
-        },
-        {
-          name: "Jelly bean",
-          calories: 375,
-          fat: 0.0,
-          carbs: 94,
-          protein: 0.0,
-        },
-        {
-          name: "Lollipop",
-          calories: 392,
-          fat: 0.2,
-          carbs: 98,
-          protein: 0,
-        },
-        {
-          name: "Honeycomb",
-          calories: 408,
-          fat: 3.2,
-          carbs: 87,
-          protein: 6.5,
-        },
-        {
-          name: "Donut",
-          calories: 452,
-          fat: 25.0,
-          carbs: 51,
-          protein: 4.9,
-        },
-        {
-          name: "KitKat",
-          calories: 518,
-          fat: 26.0,
-          carbs: 65,
-          protein: 7,
-        },
-      ];
+    async initialize() {
+      try {
+        const response = await axios.get(
+          `${import.meta.env.VITE_API_URL}/leads/list`
+        );
+        this.leads = response.data;
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
     },
 
     editItem(item) {
-      this.editedIndex = this.desserts.indexOf(item);
+      this.editedIndex = this.leads.indexOf(item);
       this.editedItem = Object.assign({}, item);
       this.dialog = true;
     },
 
     deleteItem(item) {
-      this.editedIndex = this.desserts.indexOf(item);
+      this.editedIndex = this.leads.indexOf(item);
       this.editedItem = Object.assign({}, item);
       this.dialogDelete = true;
     },
 
-    deleteItemConfirm() {
-      this.desserts.splice(this.editedIndex, 1);
-      this.closeDelete();
+    async deleteItemConfirm() {
+      try {
+        await axios.delete(
+          `${import.meta.env.VITE_API_URL}/leads/${this.editedItem.id}/`
+        );
+        this.leads.splice(this.editedIndex, 1);
+        this.closeDelete();
+      } catch (error) {
+        console.error("Error deleting item:", error);
+      }
     },
 
     close() {
@@ -265,11 +210,29 @@ export default {
       });
     },
 
-    save() {
+    async save() {
       if (this.editedIndex > -1) {
-        Object.assign(this.desserts[this.editedIndex], this.editedItem);
+        // Update existing item
+        try {
+          const response = await axios.put(
+            `${import.meta.env.VITE_API_URL}/leads/${this.editedItem.id}/`,
+            this.editedItem
+          );
+          Object.assign(this.leads[this.editedIndex], response.data);
+        } catch (error) {
+          console.error("Error updating item:", error);
+        }
       } else {
-        this.desserts.push(this.editedItem);
+        // Create new item
+        try {
+          const response = await axios.post(
+            `${import.meta.env.VITE_API_URL}/leads/`,
+            this.editedItem
+          );
+          this.leads.push(response.data);
+        } catch (error) {
+          console.error("Error creating item:", error);
+        }
       }
       this.close();
     },
