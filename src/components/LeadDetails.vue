@@ -88,7 +88,9 @@ export default {
             <Contacts />
              </v-tabs-window-item>
 
-        <v-tabs-window-item value="notes"> Two </v-tabs-window-item>
+        <v-tabs-window-item value="notes"> 
+            <Notes />
+             </v-tabs-window-item>
 
         <v-tabs-window-item value="reminders"> Three </v-tabs-window-item>
       </v-tabs-window>
