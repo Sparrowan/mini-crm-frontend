@@ -6,6 +6,6 @@ import Leads from '../components/Leads.vue';
 
 <template>
   <main>
-    <Leads />
+    <!-- <Leads /> -->
   </main>
 </template>

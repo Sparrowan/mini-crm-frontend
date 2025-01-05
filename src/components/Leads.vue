@@ -121,10 +121,15 @@
       </v-toolbar>
     </template>
     <template v-slot:item.actions="{ item }">
+      <RouterLink :to="`/lead/${item.id}`">
+        <v-icon class="me-2" size="small" color="green"> mdi-eye </v-icon>
+      </RouterLink>
       <v-icon class="me-2" size="small" @click="editLead(item)">
         mdi-pencil
       </v-icon>
-      <v-icon size="small" @click="deleteLead(item)"> mdi-delete </v-icon>
+      <v-icon size="small" @click="deleteLead(item)" color="red">
+        mdi-delete
+      </v-icon>
     </template>
     <template v-slot:item.gender="{ item }">
       <span>{{ mapGender(item.gender) }}</span>
@@ -223,6 +228,12 @@ export default {
     },
 
     editLead(item) {
+      this.editedIndex = this.leads.indexOf(item);
+      this.editedLead = Object.assign({}, item);
+      this.dialog = true;
+    },
+
+    openDetails(item) {
       this.editedIndex = this.leads.indexOf(item);
       this.editedLead = Object.assign({}, item);
       this.dialog = true;

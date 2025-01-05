@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import SideBarVue from "./components/SideBar.vue";
-import LeadsListPage from "./pages/LeadsListPage.vue";
 </script>
 
 <template>
@@ -11,7 +10,7 @@ import LeadsListPage from "./pages/LeadsListPage.vue";
       <v-main>
         <v-container>
           <v-card>
-            <LeadsListPage />
+            <RouterView />
           </v-card>
         </v-container>
       </v-main>

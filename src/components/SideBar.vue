@@ -1,4 +1,10 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import { RouterLink, useRoute } from "vue-router";
+const isActiveLink = (routePath) => {
+  const route = useRoute();
+  return route.path === routePath;
+};
+</script>
 
 <template>
   <v-navigation-drawer expand-on-hover rail>
@@ -7,7 +13,9 @@
         prepend-icon="mdi-arrow-up-bold-box-outline"
         title="Leads"
         value="leads"
-      ></v-list-item>
+        :active="isActiveLink('/')"
+        to="/"
+      />
     </v-list>
   </v-navigation-drawer>
 </template>
