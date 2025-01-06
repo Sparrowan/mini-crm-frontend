@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useRoute } from "vue-router";
-const isActiveLink = (routePath) => {
+const isActiveLink = (routePath:string) => {
   const route = useRoute();
   return route.path === routePath;
 };
